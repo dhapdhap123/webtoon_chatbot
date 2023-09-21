@@ -13,6 +13,7 @@ pyarrow = "*"
 pillow = "*"
 pinecone-client = "*"
 pinecone-datasets = "*"
+llama-index = "*"
 
 [dev-packages]
 
