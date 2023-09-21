@@ -96,7 +96,7 @@ The part of the prompt you refer to answer
 functions = [
     {
         "name": "get_character_info",
-        "description": "useful for when you need character's information",
+        "description": "useful for when you need character information",
         "parameters": {
             "type": "object",
             "properties": {
@@ -142,7 +142,7 @@ functions = [
     },
     {
         "name": "get_animal_info",
-        "description": "useful for when you need animal's information",
+        "description": "useful for when you need animal information",
         "parameters": {
             "type": "object",
             "properties": {
@@ -156,7 +156,7 @@ functions = [
     },
     {
         "name": "get_place_info",
-        "description": "useful for when you need place's information",
+        "description": "useful for when you need place information",
         "parameters": {
             "type": "object",
             "properties": {
@@ -170,7 +170,7 @@ functions = [
     },
         {
         "name": "get_appellation_info",
-        "description": "useful for when you need appellation's information",
+        "description": "useful for when you need appellation information",
         "parameters": {
             "type": "object",
             "properties": {
@@ -187,35 +187,33 @@ functions = [
 embeddings = OpenAIEmbeddings()
 
 def get_character_info(character_name):
-    # retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+    vdb_res = index.query(vector=embeddings.embed_query(character_name), top_k=1, include_metadata=True, namespace='relationship')
+    return vdb_res
 
-    # # 어떤 방식으로 데이터를 서칭하는 것이 가장 정확도가 높은가?
-    # docs = retriever.get_relevant_documents(character_name)
-
-    return [character_name]
-
-def get_previous_conversation(username, keyword):
-    # retriever = vector_store.as_retriever(search_kwargs={"k": 3})
-
-    # docs = retriever.get_relevant_documents(username, keyword)
-    return [username, keyword]
+def get_previous_conversation(keyword):
+    vdb_res = index.query(vector=embeddings.embed_query(keyword), top_k=1, include_metadata=True, namespace='conversation')
+    return vdb_res
 
 def get_skill_info(skill_name):
-    vdb_res = index.query(vector=embeddings.embed_query(skill_name), top_k=3, include_metadata=True, namespace='law')
+    vdb_res = index.query(vector=embeddings.embed_query(skill_name), top_k=1, include_metadata=True, namespace='skill')
+    return vdb_res
 
 def get_animal_info(animal_name):
-    vdb_res = index.query(vector=embeddings.embed_query(animal_name), top_k=3, include_metadata=True, namespace='law')
+    vdb_res = index.query(vector=embeddings.embed_query(animal_name), top_k=1, include_metadata=True, namespace='animal')
+    return vdb_res
 
 def get_place_info(place_name):
-    vdb_res = index.query(vector=embeddings.embed_query(place_name), top_k=3, include_metadata=True, namespace='law')
+    vdb_res = index.query(vector=embeddings.embed_query(place_name), top_k=1, include_metadata=True, namespace='place')
+    return vdb_res
 
 def get_appellation_info(appellation_name):
-    vdb_res = index.query(vector=embeddings.embed_query(appellation_name), top_k=3, include_metadata=True, namespace='law')
+    vdb_res = index.query(vector=embeddings.embed_query(appellation_name), top_k=1, include_metadata=True, namespace='appellation')
+    return vdb_res
 
 def run_conversation():
     conversation = []
     conversation.append({"role": "system", "content": character_prompt})
-    conversation.append({"role": "user", "content": "너 영찬 사제를 알아?"})
+    conversation.append({"role": "user", "content": "우리 전에 수영장 얘기했던 거 기억나?"})
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -239,8 +237,32 @@ def run_conversation():
         fuction_to_call = available_functions[function_name]
         function_args = json.loads(response_message["function_call"]["arguments"])
         
+        if function_args.get("character_name"):
+            character_name=function_args.get("character_name")
+            print('character_name: ', character_name)
+        elif function_args.get("keyword"):
+            keyword=function_args.get("keyword")
+            print('keyword: ', keyword)
+        elif function_args.get("skill_name"):
+            skill_name=function_args.get("skill_name")
+            print('skill_name: ',skill_name)
+        elif function_args.get("place_name"):
+            place_name=function_args.get("place_name")
+            print('place_name: ', place_name)
+        elif function_args.get("appellation_name"):
+            appellation_name=function_args.get("appellation_name")
+            print('appellation_name: ',appellation_name)
+        elif function_args("animal_name"):
+            animal_name=function_args("animal_name")
+            print('animal_name: ',animal_name)
+
         function_response = fuction_to_call(
             character_name=function_args.get("character_name"),
+            keyword=function_args.get("keyword"),
+            skill_name=function_args.get("skill_name"),
+            place_name=function_args.get("place_name"),
+            appellation_name=function_args.get("appellation_name"),
+            animal_name=function_args("animal_name"),
         )
         print("function_args:", function_args)
         print("function_response:", function_response)
@@ -262,4 +284,5 @@ def run_conversation():
     else:
         return response_message["content"]
     
-print(run_conversation())
+res = run_conversation()
+print(res)
