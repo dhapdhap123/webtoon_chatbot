@@ -68,9 +68,7 @@ def db_generator(folder_directory, start_index):
                 index.upsert(vectors=[data], namespace=filename_extension)
                 start_index += 1
 
-# 영찬
-# if index.describe_index_stats()['namespaces'] != {}:
-#   start_index = index.describe_index_stats()['namespaces']['book'] + 1
-# else:
-start_index = 1
-db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung", start_index=start_index)
+start_index = index.describe_index_stats()['total_vector_count'] + 1
+# db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung", start_index=start_index)
+vdb_res = index.query(vector=embeddings.embed_query("칠매검"), top_k=3, include_metadata=True, namespace='skill')
+print(vdb_res)

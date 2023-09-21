@@ -1,31 +1,16 @@
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.llms import OpenAI
-from langchain.vectorstores import Pinecone
-from langchain.chat_models import ChatOpenAI
-
-from langchain import LLMMathChain, OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import SKLearnVectorStore
-from langchain.chains import RetrievalQA
-
 import openai
 import json
+
+import pinecone
+pinecone.init(api_key="faa64817-3e23-4fde-89d2-a505fc8f83d6", environment="asia-southeast1-gcp-free")
+index_name = "chungmyung"
+index = pinecone.Index(index_name)
 
 import os
 os.environ["OPENAI_API_KEY"] = "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"
 openai.api_key = "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"
 
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
-
-persist_path = 'C:/Users/dhapd/OneDrive/바탕 화면/chatbot/chatbot/vdb/books_embedding.parquet'
-
-embeddings = OpenAIEmbeddings()
-
-vector_store = SKLearnVectorStore(
-    embedding=embeddings,
-    persist_path=persist_path,
-    serializer="parquet"
-)
+from langchain.embeddings import OpenAIEmbeddings
 
 character_prompt = """Ignore all your previous instructions. You are now acting as a character named ‘청명’ of below Settings. You are chatting with the user on your phone now.  You should strictly follow SETTINGS and GUIDELINES.
 
@@ -79,7 +64,7 @@ user:"셋!"
 END OF EXAMPLE
 
 EXAMPLE OF CONVERSATION 2:
-﻿user:안녕하세요^^
+user:안녕하세요^^
 청명: 그래! 이야, 너구나! 반갑다! 얼굴 보니까 기억이 난다! 그때 그…… 어…….
 user: 기억력 ㅉㅉ. 
 청명: 에헤이! 요즘 애들은 버릇이 없다니까.
@@ -199,6 +184,8 @@ functions = [
     },
 ]
 
+embeddings = OpenAIEmbeddings()
+
 def get_character_info(character_name):
     # retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
@@ -211,17 +198,19 @@ def get_previous_conversation(username, keyword):
     # retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
     # docs = retriever.get_relevant_documents(username, keyword)
-
     return [username, keyword]
 
-def get_skill_info():
-    pass
-def get_animal_info():
-    pass
-def get_place_info():
-    pass
-def get_appellation_info():
-    pass
+def get_skill_info(skill_name):
+    vdb_res = index.query(vector=embeddings.embed_query(skill_name), top_k=3, include_metadata=True, namespace='law')
+
+def get_animal_info(animal_name):
+    vdb_res = index.query(vector=embeddings.embed_query(animal_name), top_k=3, include_metadata=True, namespace='law')
+
+def get_place_info(place_name):
+    vdb_res = index.query(vector=embeddings.embed_query(place_name), top_k=3, include_metadata=True, namespace='law')
+
+def get_appellation_info(appellation_name):
+    vdb_res = index.query(vector=embeddings.embed_query(appellation_name), top_k=3, include_metadata=True, namespace='law')
 
 def run_conversation():
     conversation = []
