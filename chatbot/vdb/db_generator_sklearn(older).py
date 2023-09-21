@@ -44,19 +44,40 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10
 # embedding tool 가져오기
 embedding = OpenAIEmbeddings()
 # 저장 위치 지정
-persist_path = 'C:/Users/dhapd/OneDrive/바탕 화면/chatbot/chatbot/vdb/books_embedding'+".parquet"
 
-f = open('C:/Users/dhapd/OneDrive/바탕 화면/chatbot/chatbot/data/novels/데못죽 등장인물, 단체.txt', 'r', encoding='utf-8')
+# files_list = os.listdir("C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung")
+# for i in files_list:
+#     file_extension = i.split('.')[0]
+#     persist_path = f'C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/vdb/chungmyung/{file_extension}'+".parquet"
+#     f = open(f'C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/{i}', 'r', encoding='utf-8')
+#     texts = f.read()
+#     splitted_texts = texts.split('- ')
+#     refined_texts = [k.replace('- ', '') for k in splitted_texts if k != '']
+#     for j in refined_texts:
+#         splitted_texts = text_splitter.split_text(j)
+#         vector_store = SKLearnVectorStore.from_texts(
+#             texts=splitted_texts,
+#             embedding=embedding,
+#             persist_path=persist_path,
+#             serializer="parquet",
+#         )
+#         vector_store.persist()
+#         vector_store = None
+
+f = open('C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/동물.txt', 'r', encoding='utf-8')
+persist_path = f'C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/vdb/chungmyung/animal'+".parquet"
 texts = f.read()
-splitted_texts = texts.split('\n\n')
-texts = [i.replace('\n', '') for i in splitted_texts]
-for i in texts:
-    spliitted_texts = text_splitter.split_text(i)
-    vector_store = SKLearnVectorStore.from_texts(
-        texts=splitted_texts,
-        embedding=embedding,
-        persist_path=persist_path,
-        serializer="parquet",
-    )
-    vector_store.persist()
-    vector_store = None
+splitted_texts = texts.split('- ')
+print(splitted_texts)
+for i in splitted_texts:
+    if i != '':
+        # j = text_splitter.split_text(i)
+        vector_store = SKLearnVectorStore.from_texts(
+            texts=[i],
+            embedding=embedding,
+            persist_path=persist_path,
+            metadatas=[],
+            serializer="parquet",
+        )
+        vector_store.persist()
+        vector_store = None

@@ -16,7 +16,7 @@ os.environ["OPENAI_API_KEY"] = "sk-REQR0esraiWQAuTTRcI0T3BlbkFJRezSmj6rlVDWbZ1vV
 # 공유계정
 pinecone.init(api_key="faa64817-3e23-4fde-89d2-a505fc8f83d6", environment="asia-southeast1-gcp-free")
 
-index_name = "novelchatbot"
+index_name = "chungmyung"
 index = pinecone.Index(index_name)
 embeddings = OpenAIEmbeddings()
 
@@ -46,27 +46,31 @@ def db_generator(folder_directory, start_index):
     embeddings = OpenAIEmbeddings()
 
     for i in range(0, len(files_list)):
-        with open(f"{folder_directory}/{files_list[i]}", "r", encoding="cp949") as f:
+        with open(f"{folder_directory}/{files_list[i]}", "r", encoding="utf-8") as f:
             text = f.read()
         print(f"{files_list[i]} 작업중")
-        book_number = int(re.findall(r'(\d+)', files_list[i])[0])
-        chunk_size = token_calculator(text, token_limit=512)
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0)
+        filename_extension = files_list[i].split('.')[0]
+    
+        splitted_text = text.split('- ')[1:]
+        
+        pattern = r"- (.*?) : (.*?)\n\n"
+        matches = re.findall(pattern, text, re.DOTALL)
+        names = [match[0].strip() for match in matches]
+        # contents = [match[1].strip() for match in matches]
 
-        splitted_text = text_splitter.split_text(text)
-        print(len(splitted_text))
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         for j in range(len(splitted_text)):
-            print(j)
-            metadata = {"book": str(book_number), "text": splitted_text[j]}
-            data = (str(start_index), embeddings.embed_query(splitted_text[j]), metadata)
-            index.upsert(vectors=[data], namespace="novel")
-            start_index += 1
+            splitted_text_by_chunk = text_splitter.split_text(splitted_text[j])
+        
+            for k in splitted_text_by_chunk:
+                metadata = {"name": names[j], "text": k}
+                data = (str(start_index), embeddings.embed_query(k), metadata)
+                index.upsert(vectors=[data], namespace=filename_extension)
+                start_index += 1
 
 # 영찬
 # if index.describe_index_stats()['namespaces'] != {}:
 #   start_index = index.describe_index_stats()['namespaces']['book'] + 1
 # else:
 start_index = 1
-db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot/chatbot/data/novel", start_index=start_index)
-# 한별
-# db_generator(folder_directory="C:/Users/hanbyul.kim/Desktop/project/chatbot/chatbot/data/books")
+db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung", start_index=start_index)
