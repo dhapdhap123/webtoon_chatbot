@@ -43,12 +43,14 @@ def token_calculator(texts, token_limit):
 
 def db_generator(folder_directory, start_index):
     files_list = os.listdir(folder_directory)
-    embeddings = OpenAIEmbeddings()
 
     for i in range(0, len(files_list)):
         with open(f"{folder_directory}/{files_list[i]}", "r", encoding="utf-8") as f:
             text = f.read()
         print(f"{files_list[i]} 작업중")
+        # words
+        namespace = re.findall(r".+/(.+)", folder_directory)[0]
+        # animal, place, skill...
         filename_extension = files_list[i].split('.')[0]
     
         splitted_text = text.split('- ')[1:]
@@ -63,12 +65,32 @@ def db_generator(folder_directory, start_index):
             splitted_text_by_chunk = text_splitter.split_text(splitted_text[j])
         
             for k in splitted_text_by_chunk:
-                metadata = {"name": names[j], "text": k}
+                metadata = {"category": filename_extension, "name": names[j], "text": k}
                 data = (str(start_index), embeddings.embed_query(k), metadata)
-                index.upsert(vectors=[data], namespace=filename_extension)
+                index.upsert(vectors=[data], namespace=namespace)
                 start_index += 1
+    return start_index
+
+def keywords_db_generator(file_directory, start_index):
+    with open(file_directory, "r", encoding="utf-8") as f:
+        text = f.read()
+    splitted_text = text.split(',')
+    stripped_text = [i.strip() for i in splitted_text]
+
+    namespace = re.findall(r".+/(.+).txt", file_directory)[0]
+
+    for i in stripped_text:
+        metadata = {"name": i}
+        data = (str(start_index), embeddings.embed_query(i), metadata)
+        index.upsert(vectors=[data], namespace=namespace)
+        start_index += 1
+    return start_index
 
 start_index = index.describe_index_stats()['total_vector_count'] + 1
-# db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung", start_index=start_index)
-vdb_res = index.query(vector=embeddings.embed_query("칠매검"), top_k=3, include_metadata=True, namespace='skill')
-print(vdb_res)
+
+# conversation, words가능
+start_index = keywords_db_generator(file_directory='C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/keywords/keywords.txt', start_index=start_index)
+start_index = db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/words", start_index=start_index)
+db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/conversation", start_index=start_index)
+# vdb_res = index.query(vector=embeddings.embed_query("교룡"), top_k=3, include_metadata=True, namespace='relationship')
+# print(vdb_res)

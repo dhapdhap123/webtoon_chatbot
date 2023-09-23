@@ -3,7 +3,7 @@ import json
 
 import pinecone
 pinecone.init(api_key="faa64817-3e23-4fde-89d2-a505fc8f83d6", environment="asia-southeast1-gcp-free")
-index_name = "chungmyung"
+index_name = "hwasan"
 index = pinecone.Index(index_name)
 
 import os
@@ -95,128 +95,68 @@ The part of the prompt you refer to answer
 
 functions = [
     {
-        "name": "get_character_info",
-        "description": "useful for when you need character information",
+        "name": "get_word_info",
+        "description": "This function is used to enhance the AI's knowledge about in-game characters or situations that users mention but the AI doesn't initially recognize. It enables the AI to retrieve information related to the game's world view, enhancing its ability to provide informed responses.",
         "parameters": {
             "type": "object",
             "properties": {
-                "character_name": {
+                "query": {
                     "type": "string",
-                    "description": "The name of the character you need to find information about",
+                    "description": "The specific word mentioned by the user in the context of the game's world view that the AI doesn't identify."
                 },
             },
-            "required": ["character_name"],
+            "required": ["query"],
         },
     },
     {
         "name": "get_previous_conversation",
-        "description": "useful for when you need previous conversation with user. Select a keyword from the question and make it search.",
+        "description": "Use this function when you need information about previous conversation you are talking about",
         "parameters": {
             "type": "object",
             "properties": {
-                "username": {
-                    "type": "string",
-                    "description": "The user you're talking to",
-                },
                 "keyword": {
                     "type": "string",
-                    "description": "The keyword to use for the information search",
-                }
+                    "description": "keyword about what user and you are talking about previous conversation",
+                },
             },
             "required": ["keyword"],
-        },
-    },
-    {
-        "name": "get_skill_info",
-        "description": "useful for when you need skill information",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "skill_name": {
-                    "type": "string",
-                    "description": "The name of the skill you need to find information about",
-                },
-            },
-            "required": ["skill_name"],
-        },
-    },
-    {
-        "name": "get_animal_info",
-        "description": "useful for when you need animal information",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "animal_name": {
-                    "type": "string",
-                    "description": "The name of the animal you need to find information about",
-                },
-            },
-            "required": ["animal_name"],
-        },
-    },
-    {
-        "name": "get_place_info",
-        "description": "useful for when you need place information",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "place_name": {
-                    "type": "string",
-                    "description": "The name of the place you need to find information about",
-                },
-            },
-            "required": ["place_name"],
-        },
-    },
-        {
-        "name": "get_appellation_info",
-        "description": "useful for when you need appellation information",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "appellation_name": {
-                    "type": "string",
-                    "description": "The name of the appellation you need to find information about",
-                },
-            },
-            "required": ["appellation_name"],
         },
     },
 ]
 
 embeddings = OpenAIEmbeddings()
 
-def get_character_info(character_name):
-    vdb_res = index.query(vector=embeddings.embed_query(character_name), top_k=1, include_metadata=True, namespace='relationship')
-    return vdb_res
+keywords = ['마라흡혈편복', '묵린혈망', '백아', '만년화리', '교룡', '천리비응', '천리청구', '육합검', '낙화검', '칠매검', '매화벽', '월녀검', '월녀조화검',
+            '이십사수매화검법', '매화분분', '매화조광', '매영조하', '매화만개', '매화난벽', '매화폭', '매화토염', '매화만전', '매화점점', '매화인동',
+            '매화검결', '매화란구주', '매화하폭우', '매화류여하', '매화만리향', '청문', '청진', '백천', '유이설', '조걸', '윤종', '당소소', '현종',
+            '현영', '현상', '운암', '운검', '백매관', '장문인 비고', '십만대산', '검총', '북해', '백담', '장강'
+            ]
+# keywords = ['animals', 'places', 'skills', 'characters']
+#  animals = ['마라흡혈편복', '묵린혈망', '백아', '만년화리', '교룡', '천리비응', '천리청구']
+#  places = ['백매관', '장문인 비고', '십만대산', '검총', '북해', '백담', '장강']
+#  skills = ['육합검', '낙화검', '칠매검', '매화벽', '월녀검', '월녀조화검', '이십사수매화검법', '매화분분', '매화조광', '매영조하', '매화만개', '매화난벽', '매화폭', '매화토염', '매화만전', '매화점점', '매화인동', '매화검결', '매화란구주', '매화하폭우', '매화류여하', '매화만리향']
+#  characters = ['청문', '청진', '백천', '유이설', '조걸', '윤종', '당소소', '현종', '현영', '현상', '운암', '운검']
 
+def get_word_info(word):
+    if word in keywords:
+        vdb_res = index.query(vector=embeddings.embed_query(word), top_k=1, include_metadata=True, namespace='database')
+        text = vdb_res['matches']['metadata']['text']
+        return text
+    else:
+        return 'db에 없음'
+    
 def get_previous_conversation(keyword):
-    vdb_res = index.query(vector=embeddings.embed_query(keyword), top_k=1, include_metadata=True, namespace='conversation')
-    return vdb_res
-
-def get_skill_info(skill_name):
-    vdb_res = index.query(vector=embeddings.embed_query(skill_name), top_k=1, include_metadata=True, namespace='skill')
-    return vdb_res
-
-def get_animal_info(animal_name):
-    vdb_res = index.query(vector=embeddings.embed_query(animal_name), top_k=1, include_metadata=True, namespace='animal')
-    return vdb_res
-
-def get_place_info(place_name):
-    vdb_res = index.query(vector=embeddings.embed_query(place_name), top_k=1, include_metadata=True, namespace='place')
-    return vdb_res
-
-def get_appellation_info(appellation_name):
-    vdb_res = index.query(vector=embeddings.embed_query(appellation_name), top_k=1, include_metadata=True, namespace='appellation')
+    vdb_res = index.query(vector=embeddings.embed_query(keyword), top_k=1, include_metadata=True, namespace='previous_conversation')
     return vdb_res
 
 def run_conversation():
     conversation = []
     conversation.append({"role": "system", "content": character_prompt})
-    conversation.append({"role": "user", "content": "우리 전에 수영장 얘기했던 거 기억나?"})
+    conversation.append({"role": "user", "content": "교룡에 대해 어떻게 생각해?"})
 
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-0613",
+        # model="gpt-4",
         temperature=0.5,
         messages=conversation,
         functions=functions,
@@ -226,43 +166,23 @@ def run_conversation():
 
     if response_message.get("function_call"):
         available_functions = {
-            "get_character_info": get_character_info,
+            "get_word_info": get_word_info,
             "get_previous_conversation": get_previous_conversation,
-            "get_skill_info":get_skill_info,
-            "get_animal_info":get_animal_info,
-            "get_place_info":get_place_info,
-            "get_appellation_info":get_appellation_info,
         }
         function_name = response_message["function_call"]["name"]
         fuction_to_call = available_functions[function_name]
         function_args = json.loads(response_message["function_call"]["arguments"])
         
-        if function_args.get("character_name"):
-            character_name=function_args.get("character_name")
-            print('character_name: ', character_name)
+        if function_args.get("word"):
+            word=function_args.get("word")
+            print('word: ', word)
         elif function_args.get("keyword"):
             keyword=function_args.get("keyword")
-            print('keyword: ', keyword)
-        elif function_args.get("skill_name"):
-            skill_name=function_args.get("skill_name")
-            print('skill_name: ',skill_name)
-        elif function_args.get("place_name"):
-            place_name=function_args.get("place_name")
-            print('place_name: ', place_name)
-        elif function_args.get("appellation_name"):
-            appellation_name=function_args.get("appellation_name")
-            print('appellation_name: ',appellation_name)
-        elif function_args("animal_name"):
-            animal_name=function_args("animal_name")
-            print('animal_name: ',animal_name)
+            print('previous_conversation_keyword: ', keyword)
 
         function_response = fuction_to_call(
-            character_name=function_args.get("character_name"),
-            keyword=function_args.get("keyword"),
-            skill_name=function_args.get("skill_name"),
-            place_name=function_args.get("place_name"),
-            appellation_name=function_args.get("appellation_name"),
-            animal_name=function_args("animal_name"),
+            word=function_args.get("word"),
+            # keyword=function_args.get("keyword"),
         )
         print("function_args:", function_args)
         print("function_response:", function_response)
