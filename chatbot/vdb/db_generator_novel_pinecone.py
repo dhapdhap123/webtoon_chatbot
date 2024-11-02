@@ -89,8 +89,8 @@ def keywords_db_generator(file_directory, start_index):
 start_index = index.describe_index_stats()['total_vector_count'] + 1
 
 # conversation, words가능
-start_index = keywords_db_generator(file_directory='C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/keywords/keywords.txt', start_index=start_index)
-start_index = db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/words", start_index=start_index)
-db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/conversation", start_index=start_index)
-# vdb_res = index.query(vector=embeddings.embed_query("교룡"), top_k=3, include_metadata=True, namespace='relationship')
-# print(vdb_res)
+# start_index = keywords_db_generator(file_directory='C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/keywords/keywords.txt', start_index=start_index)
+# start_index = db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/words", start_index=start_index)
+# db_generator(folder_directory="C:/Users/dhapd/OneDrive/바탕 화면/chatbot_/chatbot/data/chungmyung/conversation", start_index=start_index)
+vdb_res = index.query(vector=embeddings.embed_query("교룡 귀엽지 않니 ㅎㅎ"), top_k=3, include_metadata=True, namespace='keywords')
+print(vdb_res)
