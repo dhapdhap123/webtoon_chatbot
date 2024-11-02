@@ -1,8 +1,8 @@
 import openai
 
 import os
-os.environ["OPENAI_API_KEY"] = "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"
-openai.api_key = "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"
+os.environ["OPENAI_API_KEY"] = "my-openai-api-key"
+openai.api_key = "my-openai-api-key"
 model = "gpt-4"
 
 character_prompt_1 = """

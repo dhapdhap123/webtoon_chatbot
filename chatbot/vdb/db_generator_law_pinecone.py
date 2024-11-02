@@ -2,9 +2,9 @@ import re
 import os
 from langchain.llms import OpenAI
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "my-openai-api-key"
 import pinecone
-pinecone.init(api_key="faa64817-3e23-4fde-89d2-a505fc8f83d6", environment="asia-southeast1-gcp-free")
+pinecone.init(api_key="my-pinecone-api-key", environment="asia-southeast1-gcp-free")
 
 def split_text_by_pattern(text, pattern):
     splitted_text = [i for i in re.split(pattern, text)[1:] if i is not None]

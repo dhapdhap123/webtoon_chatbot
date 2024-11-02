@@ -6,15 +6,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import TextLoader
 import pinecone
 
-os.environ["OPENAI_API_KEY"] = "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"
-# 한별이꺼
-# pinecone.init(
-#     api_key="d9a396eb-d767-44c8-92eb-b4cc054f470c",
-#     environment="asia-southeast1-gcp-free",
-# )
+os.environ["OPENAI_API_KEY"] = "my-openai-api-key"
 
 # 공유계정
-pinecone.init(api_key="faa64817-3e23-4fde-89d2-a505fc8f83d6", environment="asia-southeast1-gcp-free")
+pinecone.init(api_key="my-pinecone-api-key", environment="asia-southeast1-gcp-free")
 
 index_name = "chungmyung"
 index = pinecone.Index(index_name)

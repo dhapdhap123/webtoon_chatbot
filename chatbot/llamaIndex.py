@@ -1,5 +1,5 @@
 import os
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "my-openai-api-key"
 
 from llama_index import (
     SimpleDirectoryReader,

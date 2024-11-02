@@ -1,7 +1,7 @@
 import os
 import openai
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "my-openai-api-key"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 training_file_name = 'C:/Users/dhapd/OneDrive/바탕 화면/chatbot/chatbot/finetuning/training.jsonl'
